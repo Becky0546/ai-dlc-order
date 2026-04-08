@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/useAuthStore';
+import ReLoginModal from '../components/ReLoginModal';
 
 export default function AdminLayout() {
   const { storeName, logout } = useAuthStore();
@@ -59,6 +60,8 @@ export default function AdminLayout() {
       <main className="flex-1 p-6">
         <Outlet />
       </main>
+
+      <ReLoginModal />
     </div>
   );
 }
