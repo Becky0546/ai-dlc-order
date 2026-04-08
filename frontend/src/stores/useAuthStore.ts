@@ -8,12 +8,10 @@ interface AuthState {
   storeName: string | null;
   storeCode: string | null;
   isAuthenticated: boolean;
-  showReLoginModal: boolean;
 
   loginAdmin: (response: LoginResponse, storeCode: string) => void;
   loginTable: (response: TableLoginResponse) => void;
   logout: () => void;
-  setShowReLoginModal: (show: boolean) => void;
   restoreFromStorage: () => boolean;
 }
 
@@ -24,7 +22,6 @@ export const useAuthStore = create<AuthState>((set) => ({
   storeName: null,
   storeCode: null,
   isAuthenticated: false,
-  showReLoginModal: false,
 
   loginAdmin: (response, storeCode) => {
     localStorage.setItem('auth_token', response.token);
@@ -68,27 +65,36 @@ export const useAuthStore = create<AuthState>((set) => ({
       storeName: null,
       storeCode: null,
       isAuthenticated: false,
-      showReLoginModal: false,
     });
   },
-
-  setShowReLoginModal: (show) => set({ showReLoginModal: show }),
 
   restoreFromStorage: () => {
     const token = localStorage.getItem('auth_token');
     const role = localStorage.getItem('auth_role') as 'ADMIN' | 'TABLE' | null;
 
-    if (token && role) {
-      set({
-        token,
-        role,
-        expiresAt: localStorage.getItem('auth_expires_at'),
-        storeName: localStorage.getItem('store_name'),
-        storeCode: localStorage.getItem('store_code'),
-        isAuthenticated: true,
-      });
-      return true;
+    if (!token || !role) return false;
+
+    // ADMIN 토큰 만료 체크
+    if (role === 'ADMIN') {
+      const expiresAt = localStorage.getItem('auth_expires_at');
+      if (expiresAt && new Date(expiresAt).getTime() < Date.now()) {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('auth_role');
+        localStorage.removeItem('auth_expires_at');
+        localStorage.removeItem('store_name');
+        localStorage.removeItem('store_code');
+        return false;
+      }
     }
-    return false;
+
+    set({
+      token,
+      role,
+      expiresAt: localStorage.getItem('auth_expires_at'),
+      storeName: localStorage.getItem('store_name'),
+      storeCode: localStorage.getItem('store_code'),
+      isAuthenticated: true,
+    });
+    return true;
   },
 }));

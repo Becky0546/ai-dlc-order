@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-export function useRecommendationTimer(delayMs = 60000) {
+export function useRecommendationTimer(delayMs = 10000) {
   const [shouldShow, setShouldShow] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
 
