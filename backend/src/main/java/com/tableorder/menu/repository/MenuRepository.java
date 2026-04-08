@@ -85,4 +85,13 @@ public class MenuRepository {
                     existing.getCategoryName(), displayOrder, existing.getAverageRating()));
         }
     }
+
+    public void updateImageUrl(Long id, String imageUrl) {
+        MenuResponse existing = store.get(id);
+        if (existing != null) {
+            store.put(id, new MenuResponse(existing.getId(), existing.getName(), existing.getPrice(),
+                    existing.getDescription(), imageUrl, existing.getCategoryId(),
+                    existing.getCategoryName(), existing.getDisplayOrder(), existing.getAverageRating()));
+        }
+    }
 }
