@@ -10,14 +10,27 @@ interface TableState {
   setTableInfo: (info: TableLoginResponse) => void;
   setSessionId: (sessionId: number) => void;
   clear: () => void;
-  restoreFromStorage: () => void;
 }
 
+function loadInitialTableState() {
+  const stored = localStorage.getItem('table_info');
+  if (stored) {
+    try {
+      return JSON.parse(stored) as { storeId: number; tableId: number; tableName: string; sessionId: number | null };
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+const initial = loadInitialTableState();
+
 export const useTableStore = create<TableState>((set) => ({
-  storeId: null,
-  tableId: null,
-  tableName: null,
-  sessionId: null,
+  storeId: initial?.storeId ?? null,
+  tableId: initial?.tableId ?? null,
+  tableName: initial?.tableName ?? null,
+  sessionId: initial?.sessionId ?? null,
 
   setTableInfo: (info) => {
     const tableInfo = {
@@ -27,13 +40,11 @@ export const useTableStore = create<TableState>((set) => ({
       sessionId: info.sessionId,
     };
     localStorage.setItem('table_info', JSON.stringify(tableInfo));
-
     set(tableInfo);
   },
 
   setSessionId: (sessionId) => {
     set({ sessionId });
-
     const stored = localStorage.getItem('table_info');
     if (stored) {
       const info = JSON.parse(stored);
@@ -45,13 +56,5 @@ export const useTableStore = create<TableState>((set) => ({
   clear: () => {
     localStorage.removeItem('table_info');
     set({ storeId: null, tableId: null, tableName: null, sessionId: null });
-  },
-
-  restoreFromStorage: () => {
-    const stored = localStorage.getItem('table_info');
-    if (stored) {
-      const info = JSON.parse(stored);
-      set(info);
-    }
   },
 }));
