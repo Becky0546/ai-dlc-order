@@ -12,16 +12,43 @@ interface AuthState {
   loginAdmin: (response: LoginResponse, storeCode: string) => void;
   loginTable: (response: TableLoginResponse) => void;
   logout: () => void;
-  restoreFromStorage: () => boolean;
 }
 
+function loadInitialState() {
+  const token = localStorage.getItem('auth_token');
+  const role = localStorage.getItem('auth_role') as 'ADMIN' | 'TABLE' | null;
+
+  if (!token || !role) {
+    return { token: null, role: null, expiresAt: null, storeName: null, storeCode: null, isAuthenticated: false };
+  }
+
+  // ADMIN 토큰 만료 체크
+  if (role === 'ADMIN') {
+    const expiresAt = localStorage.getItem('auth_expires_at');
+    if (expiresAt && new Date(expiresAt).getTime() < Date.now()) {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_role');
+      localStorage.removeItem('auth_expires_at');
+      localStorage.removeItem('store_name');
+      localStorage.removeItem('store_code');
+      return { token: null, role: null, expiresAt: null, storeName: null, storeCode: null, isAuthenticated: false };
+    }
+  }
+
+  return {
+    token,
+    role,
+    expiresAt: localStorage.getItem('auth_expires_at'),
+    storeName: localStorage.getItem('store_name'),
+    storeCode: localStorage.getItem('store_code'),
+    isAuthenticated: true,
+  };
+}
+
+const initialState = loadInitialState();
+
 export const useAuthStore = create<AuthState>((set) => ({
-  token: null,
-  role: null,
-  expiresAt: null,
-  storeName: null,
-  storeCode: null,
-  isAuthenticated: false,
+  ...initialState,
 
   loginAdmin: (response, storeCode) => {
     localStorage.setItem('auth_token', response.token);
@@ -66,35 +93,5 @@ export const useAuthStore = create<AuthState>((set) => ({
       storeCode: null,
       isAuthenticated: false,
     });
-  },
-
-  restoreFromStorage: () => {
-    const token = localStorage.getItem('auth_token');
-    const role = localStorage.getItem('auth_role') as 'ADMIN' | 'TABLE' | null;
-
-    if (!token || !role) return false;
-
-    // ADMIN 토큰 만료 체크
-    if (role === 'ADMIN') {
-      const expiresAt = localStorage.getItem('auth_expires_at');
-      if (expiresAt && new Date(expiresAt).getTime() < Date.now()) {
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('auth_role');
-        localStorage.removeItem('auth_expires_at');
-        localStorage.removeItem('store_name');
-        localStorage.removeItem('store_code');
-        return false;
-      }
-    }
-
-    set({
-      token,
-      role,
-      expiresAt: localStorage.getItem('auth_expires_at'),
-      storeName: localStorage.getItem('store_name'),
-      storeCode: localStorage.getItem('store_code'),
-      isAuthenticated: true,
-    });
-    return true;
   },
 }));

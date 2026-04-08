@@ -13,6 +13,9 @@ export default function TableDetailModal({ table, onClose }: TableDetailModalPro
   const queryClient = useQueryClient();
   const { data: orders = [] } = useTableOrders(table.tableId);
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
+  const [showSettlement, setShowSettlement] = useState(false);
+  const [settlementDone, setSettlementDone] = useState(false);
+  const [isSettling, setIsSettling] = useState(false);
 
   const deleteMutation = useMutation({
     mutationFn: (orderId: number) => deleteOrder(orderId),
@@ -22,6 +25,42 @@ export default function TableDetailModal({ table, onClose }: TableDetailModalPro
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
   });
+
+  const handleSettle = async () => {
+    setIsSettling(true);
+    try {
+      for (const order of orders) {
+        await deleteOrder(order.orderId);
+      }
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      setShowSettlement(false);
+      setSettlementDone(true);
+    } finally {
+      setIsSettling(false);
+    }
+  };
+
+  if (settlementDone) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
+        <div
+          className="mx-4 w-full max-w-sm rounded-xl bg-white p-8 text-center shadow-xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="text-5xl">✅</div>
+          <p className="mt-4 text-lg font-bold text-gray-900">결제 완료되었습니다</p>
+          <p className="mt-1 text-sm text-gray-500">테이블 {table.tableNumber}의 주문 내역이 초기화되었습니다</p>
+          <button
+            onClick={onClose}
+            className="mt-6 rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+          >
+            확인
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
@@ -91,6 +130,43 @@ export default function TableDetailModal({ table, onClose }: TableDetailModalPro
             <p className="py-8 text-center text-gray-400">주문이 없습니다</p>
           )}
         </div>
+
+        {/* 정산 완료 버튼 */}
+        {orders.length > 0 && (
+          <div className="mt-4 border-t pt-4">
+            {!showSettlement ? (
+              <button
+                onClick={() => setShowSettlement(true)}
+                className="w-full rounded-lg bg-green-600 py-3 text-sm font-semibold text-white hover:bg-green-700"
+                data-testid="table-settle-button"
+              >
+                정산 완료 ({table.totalAmount.toLocaleString()}원)
+              </button>
+            ) : (
+              <div className="rounded-lg bg-green-50 p-3">
+                <p className="text-sm font-medium text-green-800">
+                  테이블 {table.tableNumber}의 주문을 정산하시겠습니까?
+                </p>
+                <div className="mt-2 flex gap-2">
+                  <button
+                    onClick={handleSettle}
+                    disabled={isSettling}
+                    className="flex-1 rounded-lg bg-green-600 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:bg-gray-300"
+                    data-testid="table-settle-confirm"
+                  >
+                    {isSettling ? '처리 중...' : '정산 확인'}
+                  </button>
+                  <button
+                    onClick={() => setShowSettlement(false)}
+                    className="flex-1 rounded-lg border py-2 text-sm font-semibold text-gray-700"
+                  >
+                    취소
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
