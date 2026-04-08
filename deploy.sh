@@ -6,12 +6,24 @@ echo "=== Table Order 배포 스크립트 ==="
 # 1. Docker 설치 (없으면)
 if ! command -v docker &> /dev/null; then
     echo "[1/3] Docker 설치 중..."
-    sudo yum update -y
-    sudo yum install -y docker
+    if command -v apt-get &> /dev/null; then
+        # Ubuntu / Debian
+        sudo apt-get update -y
+        sudo apt-get install -y docker.io
+    elif command -v yum &> /dev/null; then
+        # Amazon Linux / RHEL
+        sudo yum update -y
+        sudo yum install -y docker
+    else
+        echo "지원하지 않는 OS입니다. Docker를 수동 설치해주세요."
+        exit 1
+    fi
     sudo systemctl start docker
     sudo systemctl enable docker
     sudo usermod -aG docker $USER
-    echo "Docker 설치 완료. 그룹 적용을 위해 newgrp docker로 재실행하거나 재접속 후 다시 실행하세요."
+    echo "Docker 설치 완료."
+    echo "그룹 적용을 위해 'newgrp docker' 실행 후 다시 ./deploy.sh 를 실행하세요."
+    exit 0
 fi
 
 # 2. Docker Compose 설치 (없으면)
