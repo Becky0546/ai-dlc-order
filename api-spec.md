@@ -51,29 +51,16 @@
   "token": "string (JWT)",
   "storeId": 1,
   "tableId": 1,
-  "tableName": "string",
-  "sessionId": 1
+  "tableName": "string"
 }
 ```
-> `sessionId`는 활성 세션이 없으면 `null`
 
 **Error:** 401 인증 실패
 
 ---
 
-### POST /api/v1/auth/refresh
-토큰 갱신
-
-**Request Header:** `Authorization: Bearer {token}`
-
-**Response 200:**
-```json
-{
-  "token": "string (JWT)",
-  "expiresAt": "string (ISO 8601)",
-  "storeName": "string"
-}
-```
+### ~~POST /api/v1/auth/refresh~~ [SPEC OUT]
+~~토큰 갱신~~
 
 ---
 
@@ -174,6 +161,7 @@
   "name": "string",
   "price": 10000,
   "description": "string",
+  "imageUrl": "string (외부 URL, optional)",
   "categoryId": 1,
   "displayOrder": 0
 }
@@ -214,17 +202,8 @@
 
 ---
 
-### POST /api/v1/menus/{menuId}/image
-메뉴 이미지 업로드 (최대 2MB)
-
-**Request:** `Content-Type: multipart/form-data`, field name: `file`
-
-**Response 200:**
-```json
-{
-  "imageUrl": "string (S3 URL)"
-}
-```
+### ~~POST /api/v1/menus/{menuId}/image~~ [SPEC OUT]
+~~메뉴 이미지 업로드 — 외부 URL 사용으로 대체 (메뉴 등록/수정 시 imageUrl 필드 직접 입력)~~
 
 ---
 
@@ -240,13 +219,10 @@
     "id": 1,
     "number": 1,
     "name": "string",
-    "password": "string",
-    "currentSessionId": 1,
-    "sessionStatus": "ACTIVE"
+    "password": "string"
   }
 ]
 ```
-> `currentSessionId`는 세션 없으면 `null`, `sessionStatus`는 `"ACTIVE"` | `"ENDED"` | `null`
 
 ---
 
@@ -281,18 +257,8 @@
 
 ---
 
-### POST /api/v1/tables/{tableId}/sessions/end
-테이블 이용 완료 (세션 종료)
-
-현재 세션의 주문을 이력으로 이동하고 테이블을 리셋합니다.
-
-**Response 200:**
-```json
-{
-  "archivedOrderCount": 5,
-  "totalAmount": 50000
-}
-```
+### ~~POST /api/v1/tables/{tableId}/sessions/end~~ [SPEC OUT]
+~~테이블 이용 완료 (세션 종료)~~
 
 ---
 
@@ -305,7 +271,6 @@
 ```json
 {
   "tableId": 1,
-  "sessionId": 1,
   "items": [
     { "menuId": 1, "quantity": 2 },
     { "menuId": 3, "quantity": 1 }
@@ -327,7 +292,6 @@
     }
   ],
   "totalAmount": 30000,
-  "status": "PENDING",
   "createdAt": "string (ISO 8601)"
 }
 ```
@@ -337,7 +301,7 @@
 ### GET /api/v1/orders
 주문 조회 (현재 세션)
 
-**Query Params:** `tableId` (required), `sessionId` (optional)
+**Query Params:** `tableId` (required)
 
 **Response 200:** `OrderResponse[]` (위 구조의 배열)
 
@@ -350,17 +314,8 @@
 
 ---
 
-### PATCH /api/v1/orders/{orderId}/status
-주문 상태 변경 (관리자)
-
-**Request Body:**
-```json
-{
-  "status": "PENDING | PREPARING | COMPLETED"
-}
-```
-
-**Response 200:** OrderResponse 객체 (상태 업데이트됨)
+### ~~PATCH /api/v1/orders/{orderId}/status~~ [SPEC OUT]
+~~주문 상태 변경 (관리자)~~
 
 ---
 
@@ -414,7 +369,6 @@
         "orderNumber": "ORD-20260408-001",
         "menuSummary": "김치찌개 x2, 된장찌개 x1",
         "totalAmount": 30000,
-        "status": "PENDING",
         "createdAt": "string (ISO 8601)"
       }
     ],
@@ -504,34 +458,20 @@
 
 ---
 
-## 8. SSE (Server-Sent Events)
-
-### GET /api/v1/sse/orders
-관리자 실시간 주문 이벤트 스트림
-
-**Protocol:** Server-Sent Events (EventSource)
-
-**Event Types:**
-| 이벤트 | 발생 시점 |
-|---|---|
-| `NEW_ORDER` | 새 주문 생성 시 |
-| `ORDER_STATUS_CHANGED` | 주문 상태 변경 시 |
-| `ORDER_DELETED` | 주문 삭제 시 |
-
-**요구사항:** 2초 이내 이벤트 전달
+## ~~8. SSE (Server-Sent Events)~~ [SPEC OUT]
 
 ---
 
 ## Summary
 
-| 영역 | 엔드포인트 수 |
-|---|---|
-| Authentication | 3 |
-| Categories | 4 |
-| Menus | 6 |
-| Tables | 4 |
-| Orders | 6 |
-| Ratings | 2 |
-| Recommendations | 2 |
-| SSE | 1 |
-| **합계** | **28** |
+| 영역 | 엔드포인트 수 | 비고 |
+|---|---|---|
+| Authentication | 2 | refresh SPEC OUT |
+| Categories | 4 | |
+| Menus | 5 | image upload SPEC OUT, imageUrl 필드로 대체 |
+| Tables | 3 | session end SPEC OUT |
+| Orders | 5 | status change SPEC OUT |
+| Ratings | 2 | |
+| Recommendations | 2 | |
+| ~~SSE~~ | ~~1~~ | SPEC OUT |
+| **합계** | **23** | |
