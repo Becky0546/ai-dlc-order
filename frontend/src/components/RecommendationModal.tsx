@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useRecommendations } from '../hooks/useRecommendations';
+import { useMenus } from '../hooks/useMenus';
 import { useCartStore } from '../stores/useCartStore';
 import StarRating from './StarRating';
 import type { Gender, AgeGroup } from '../types/recommendation';
@@ -27,6 +28,7 @@ export default function RecommendationModal({ onClose }: RecommendationModalProp
   const [step, setStep] = useState<'select' | 'result'>('select');
 
   const { data, isLoading } = useRecommendations(gender, ageGroup);
+  const { data: menus = [] } = useMenus();
   const addItem = useCartStore((s) => s.addItem);
 
   const handleCheck = () => {
@@ -34,7 +36,8 @@ export default function RecommendationModal({ onClose }: RecommendationModalProp
   };
 
   const handleAddToCart = (menu: { menuId: number; menuName: string; imageUrl: string }) => {
-    addItem({ menuId: menu.menuId, menuName: menu.menuName, price: 0, imageUrl: menu.imageUrl }, 1);
+    const found = menus.find((m) => m.id === menu.menuId);
+    addItem({ menuId: menu.menuId, menuName: menu.menuName, price: found?.price ?? 0, imageUrl: menu.imageUrl }, 1);
   };
 
   return (
