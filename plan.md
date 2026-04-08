@@ -22,6 +22,33 @@ main
 
 ---
 
+## 작업 디렉토리 규칙
+
+**각 포지션은 반드시 자신의 지정 디렉토리에서만 작업합니다.**
+
+| 포지션 | 작업 디렉토리 | 설명 |
+|---|---|---|
+| **FE** | `frontend/` | React TypeScript 프론트엔드 코드 |
+| **BE** | `backend/` | Spring Boot 백엔드 코드 |
+| **PO** | `QA/` | 테스트 계획, 수용 기준, QA 산출물 |
+
+```
+aidlc-table-order/
++-- frontend/    <-- FE 개발자 작업 영역 (React TypeScript)
++-- backend/     <-- BE 개발자 작업 영역 (Spring Boot)
++-- QA/          <-- PO 작업 영역 (테스트 계획, 수용 검증)
++-- aidlc-docs/  <-- 공통 문서 (설계, 요구사항, 계획)
++-- requirements/ <-- 요구사항 원본
++-- plan.md      <-- 이 문서
+```
+
+**주의사항:**
+- 다른 포지션의 디렉토리에 있는 코드를 직접 수정하지 않습니다
+- 공통 문서(`aidlc-docs/`, `requirements/`, `plan.md`)는 모든 포지션이 참조 가능
+- API 계약 변경 시 `component-methods.md`를 먼저 수정하고 팀에 공유
+
+---
+
 ## 포지션별 참고 문서
 
 ### PO (Product Owner)
@@ -97,6 +124,9 @@ React TypeScript UI, 상태 관리(Zustand/React Query), 고객용/관리자용 
 ```
 aidlc-table-order/
 +-- plan.md                          <-- 이 문서 (전체 협업 계획)
++-- frontend/                        <-- FE 작업 영역
++-- backend/                         <-- BE 작업 영역
++-- QA/                              <-- PO 작업 영역
 +-- requirements/
 |   +-- table-order-requirements.md  <-- PO: 원본 요구사항
 |   +-- constraints.md               <-- PO: 제외 사항
