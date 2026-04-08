@@ -1,10 +1,8 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { adminLogin } from '../api/authApi';
 import { useAuthStore } from '../stores/useAuthStore';
 
 export default function ReLoginModal() {
-  const navigate = useNavigate();
   const { showReLoginModal, setShowReLoginModal, storeCode, loginAdmin, logout } =
     useAuthStore();
 
@@ -41,7 +39,7 @@ export default function ReLoginModal() {
     logout();
     setShowReLoginModal(false);
     setForm({ username: '', password: '' });
-    navigate('/admin/login');
+    window.location.href = '/admin/login';
   };
 
   return (

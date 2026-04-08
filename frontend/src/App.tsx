@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import router from './routes';
-import ReLoginModal from './components/ReLoginModal';
 import { useAuthStore } from './stores/useAuthStore';
 import { useTableStore } from './stores/useTableStore';
 
@@ -27,7 +26,6 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
-      <ReLoginModal />
     </QueryClientProvider>
   );
 }
