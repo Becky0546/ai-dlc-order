@@ -1,13 +1,28 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import DemographicModal from '../../components/DemographicModal';
 
 export default function OrderSuccessPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const orderId = Number(searchParams.get('orderId')) || 0;
   const orderNumber = searchParams.get('orderNumber') ?? '';
+
+  const [showDemographic, setShowDemographic] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
   const [countdown, setCountdown] = useState(5);
 
+  // 3초 후 설문 모달 표시
   useEffect(() => {
+    if (dismissed || !orderId) return;
+    const delay = setTimeout(() => setShowDemographic(true), 3000);
+    return () => clearTimeout(delay);
+  }, [dismissed, orderId]);
+
+  // 설문 완료/닫기 후 카운트다운
+  useEffect(() => {
+    if (!dismissed) return;
+
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
@@ -19,7 +34,12 @@ export default function OrderSuccessPage() {
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [navigate]);
+  }, [navigate, dismissed]);
+
+  const closeDemographic = () => {
+    setShowDemographic(false);
+    setDismissed(true);
+  };
 
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center p-8">
@@ -28,16 +48,29 @@ export default function OrderSuccessPage() {
       <p className="mt-2 text-lg text-gray-600">
         주문번호: <span className="font-bold text-blue-600" data-testid="order-success-number">#{orderNumber}</span>
       </p>
-      <p className="mt-6 text-sm text-gray-400">
-        {countdown}초 후 메뉴 화면으로 이동합니다
-      </p>
-      <button
-        onClick={() => navigate('/customer/menu', { replace: true })}
-        className="mt-4 rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700"
-        data-testid="order-success-go-menu"
-      >
-        메뉴로 돌아가기
-      </button>
+
+      {dismissed && (
+        <>
+          <p className="mt-6 text-sm text-gray-400">
+            {countdown}초 후 메뉴 화면으로 이동합니다
+          </p>
+          <button
+            onClick={() => navigate('/customer/menu', { replace: true })}
+            className="mt-4 rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+            data-testid="order-success-go-menu"
+          >
+            메뉴로 돌아가기
+          </button>
+        </>
+      )}
+
+      {showDemographic && orderId > 0 && (
+        <DemographicModal
+          orderId={orderId}
+          onClose={closeDemographic}
+          onComplete={closeDemographic}
+        />
+      )}
     </div>
   );
 }

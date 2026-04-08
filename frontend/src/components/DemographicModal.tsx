@@ -93,6 +93,13 @@ export default function DemographicModal({ orderId, onClose, onComplete }: Demog
             건너뛰기
           </button>
         </div>
+        <button
+          onClick={onClose}
+          className="mt-3 w-full text-xs text-gray-400 underline"
+          data-testid="demographic-later"
+        >
+          다음에 할게요
+        </button>
       </div>
     </div>
   );
