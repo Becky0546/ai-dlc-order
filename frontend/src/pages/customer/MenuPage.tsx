@@ -1,13 +1,16 @@
 import { useState, useMemo } from 'react';
 import { useCategories, useMenus, useMenuRatings } from '../../hooks/useMenus';
 import { useCartStore } from '../../stores/useCartStore';
+import { useRecommendationTimer } from '../../hooks/useRecommendationTimer';
 import MenuCard from '../../components/MenuCard';
 import MenuDetailModal from '../../components/MenuDetailModal';
+import RecommendationModal from '../../components/RecommendationModal';
 import type { Menu } from '../../types/menu';
 
 export default function MenuPage() {
   const { data: categories = [] } = useCategories();
   const { data: menus = [], isLoading } = useMenus();
+  const { shouldShow: showRecommendation, dismiss: dismissRecommendation } = useRecommendationTimer();
   const { data: ratings = [] } = useMenuRatings();
   const addItem = useCartStore((s) => s.addItem);
 
@@ -87,6 +90,11 @@ export default function MenuPage() {
           onClose={() => setSelectedMenu(null)}
           onAddToCart={handleAddToCart}
         />
+      )}
+
+      {/* 추천 모달 (1분 후 자동 표시) */}
+      {showRecommendation && (
+        <RecommendationModal onClose={dismissRecommendation} />
       )}
     </div>
   );
