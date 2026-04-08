@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { adminLogin } from '../../api/authApi';
 import { useAuthStore } from '../../stores/useAuthStore';
 
@@ -17,8 +17,7 @@ export default function AdminLoginPage() {
 
   // 이미 인증됨 → 대시보드로
   if (isAuthenticated && role === 'ADMIN') {
-    navigate('/admin/dashboard', { replace: true });
-    return null;
+    return <Navigate to="/admin/dashboard" replace />;
   }
 
   const isFormValid =

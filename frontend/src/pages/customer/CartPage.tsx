@@ -1,37 +1,9 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useCartStore, useCartTotalAmount } from '../../stores/useCartStore';
-import { useTableStore } from '../../stores/useTableStore';
-import { useCreateOrder } from '../../hooks/useCreateOrder';
 
 export default function CartPage() {
-  const navigate = useNavigate();
-  const { items, updateQuantity, removeItem, clear } = useCartStore();
+  const { items, updateQuantity, removeItem } = useCartStore();
   const totalAmount = useCartTotalAmount();
-  const { tableId } = useTableStore();
-  const createOrder = useCreateOrder();
-  const [error, setError] = useState<string | null>(null);
-
-  const handleOrder = () => {
-    if (!tableId || items.length === 0) return;
-    setError(null);
-
-    createOrder.mutate(
-      {
-        tableId,
-        items: items.map((i) => ({ menuId: i.menuId, quantity: i.quantity })),
-      },
-      {
-        onSuccess: (data) => {
-          clear();
-          navigate(`/customer/order-success?orderId=${data.orderId}&orderNumber=${data.orderNumber}`, { replace: true });
-        },
-        onError: () => {
-          setError('주문에 실패했습니다. 다시 시도해주세요.');
-        },
-      },
-    );
-  };
 
   if (items.length === 0) {
     return (
@@ -49,7 +21,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="pb-28">
+    <div className="pb-4">
       <div className="px-4 pt-4">
         <h1 className="text-lg font-bold text-gray-900">장바구니</h1>
       </div>
@@ -111,25 +83,10 @@ export default function CartPage() {
         ))}
       </ul>
 
-      {error && (
-        <p className="mx-4 mt-3 text-sm text-red-600" data-testid="cart-order-error">{error}</p>
-      )}
-
-      {/* 하단 고정 — 총 금액 + 주문하기 */}
-      <div className="fixed bottom-0 left-0 right-0 border-t bg-white px-4 py-4 shadow-lg">
-        <div className="mb-2 flex items-center justify-between">
-          <span className="text-base font-medium text-gray-700">총 금액</span>
-          <span className="text-xl font-bold text-gray-900">{totalAmount.toLocaleString()}원</span>
-        </div>
-        <button
-          onClick={handleOrder}
-          disabled={createOrder.isPending}
-          className="w-full rounded-xl bg-blue-600 py-4 text-base font-semibold text-white hover:bg-blue-700 disabled:bg-gray-300"
-          style={{ minHeight: '48px' }}
-          data-testid="cart-order-button"
-        >
-          {createOrder.isPending ? '주문 중...' : `${totalAmount.toLocaleString()}원 주문하기`}
-        </button>
+      {/* 총 금액 */}
+      <div className="mx-4 mt-4 flex items-center justify-between rounded-lg bg-gray-100 px-4 py-3">
+        <span className="text-base font-medium text-gray-700">총 금액</span>
+        <span className="text-xl font-bold text-gray-900">{totalAmount.toLocaleString()}원</span>
       </div>
     </div>
   );

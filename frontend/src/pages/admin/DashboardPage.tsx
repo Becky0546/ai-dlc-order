@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useDashboard } from '../../hooks/useOrders';
-import { useSSE } from '../../hooks/useSSE';
 import TableCard from '../../components/TableCard';
 import TableDetailModal from '../../components/TableDetailModal';
 import type { TableDashboardResponse } from '../../types/dashboard';
@@ -8,8 +7,6 @@ import type { TableDashboardResponse } from '../../types/dashboard';
 export default function DashboardPage() {
   const { data: tables = [], isLoading } = useDashboard();
   const [selectedTable, setSelectedTable] = useState<TableDashboardResponse | null>(null);
-
-  useSSE();
 
   if (isLoading) {
     return (
